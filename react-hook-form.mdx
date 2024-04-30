@@ -5,8 +5,6 @@ date: '2024-04-19'
 tags: ['react.js', 'forms']
 ---
 
-import Form from './components/react-hook-form/Form.tsx';
-
 # React Hook Form (basics)
 
 We will take a look at just a basics of React Hook Form. We won't focus on more advanced use cases such as working with external UI liblaries and using "Controller" from RHF. So let's started.
@@ -15,7 +13,12 @@ In this article we'll build a basic form using React Hook Form with zod validati
 
 Form should be here:
 
-<Form />
+<form action="" className="flex flex-col gap-2">
+  <input type="text" className="bg-amber-400 p-8 text-red-600" />
+  <input type="text" />
+  <input type="text" />
+  <input type="text" />
+</form>
 
 <p className="text-red-600">Styled with tailwind</p>
 
