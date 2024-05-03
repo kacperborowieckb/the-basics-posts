@@ -1,23 +1,215 @@
 ---
 title: 'React Hook Form'
-desc: 'Learn how to handle forms in React.js with an amazing lightweight tool which is React Hook Form. It allows to handle state and validate it very easily. It is also more performant than normal controlled forms.'
+desc: 'Learn how to handle forms in React.js with an amazing lightweight tool which is React Hook Form. It allows to handle form state and validate it very easily. It is also more performant than normal controlled forms.'
 date: '2024-04-19'
 tags: ['react.js', 'forms']
 ---
 
-# React Hook Form (basics)
+# React Hook Form with Zod
 
-We will take a look at just a basics of React Hook Form. We won't focus on more advanced use cases such as working with external UI liblaries and using "Controller" from RHF. So let's started.
+In this article we'll build a basic form using React Hook Form with zod validation.
 
-In this article we'll build a basic form using React Hook Form with zod validation. At the end you will be able to build something like this:
+We will take a look at just a basics of React Hook Form. We won't focus on styling or more advanced use cases such as working with external UI libraries and using "Controller".
 
-Form should be here:
+## Why React Hook Form?
 
-<form action="">
-  <input type="text" />
-  <input type="text" />
-  <input type="text" />
-  <input type="text" />
-</form>
+React Hook Form is an amazing lightweight tool. It allows to handle form state and validate it very easily. It is also more performant than normal controlled forms. It doesn't re-render a component on every input change like with `useState` approach. With all of that, it is very easy to understand as well and that's just a main things. For more take a closer look at [React Hook Form documentation](https://react-hook-form.com/docs).
 
-React Hook Form provides one main hook you will use every time called **useForm**
+## Creating a schema
+
+At first, let's declare form schema. I think it is good to start with that, because it make our work easier when creating a form.
+
+```tsx
+const FormSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address' }),
+  username: z
+    .string()
+    .min(4, { message: 'Username must be 5 or more characters long' })
+    .max(16, { message: 'Username must be 16 or fewer characters long' }),
+  password: z
+    .string()
+    .min(4, { message: 'Password must be 5 or more characters long' })
+    .max(16, { message: 'Password must be 16 or fewer characters long' }),
+});
+```
+
+Zod validation is very easy to understand. It allows you to check if user provided correct email address or to check if the username or password is between 4 and 16 and provide specific message if not. I strongly encourage you to take a look at [zod documentation.](https://zod.dev/) for more specific use cases.
+
+To use it with React Hook Form we need to make a type from this schema.
+
+```tsx
+type TFormSchema = z.infer<typeof FormSchema>;
+```
+
+Now `TFormSchema` is the type of our form.
+
+## Starting with React Hook Form
+
+Let's start creating out form. At first we'll take a look at `useForm` hook. It provides for us many properties and functions. For now let's focus on two of them.
+
+```tsx
+const { register, handleSubmit } = useForm();
+```
+
+You probably already know what they do:
+
+- `register` is used to "register" the input in our FormData
+- `handleSubmit` is the function we want to pass as a onSubmit event on our form.
+
+To connect our zod validation to this form we need to use schema type as a generic.
+
+```tsx
+const { register, handleSubmit } = useForm<TFormSchema>({
+  resolver: zodResolver(FormSchema),
+});
+```
+
+`useForm` takes a object as a first argument and in this case we need to tell which resolver we want to use. `zodResolver` function which takes previously created schema as a argument comes from `@hookform/resolvers/zod`
+
+## Creating a form.
+
+We're ready to create our form. Let's start with just a skeleton.
+
+```tsx
+export default function Form() {
+  const { register, handleSubmit } = useForm<TFormSchema>({
+    resolver: zodResolver(FormSchema),
+  });
+
+  return (
+    <form>
+      <input placeholder="Email" />
+      <input placeholder="Username" />
+      <input placeholder="Password" type="password" />
+      <button type="submit">Sign in</button>
+    </form>
+  );
+}
+```
+
+### But how to use `register` and `handleSubmit`?
+
+`register` is a function that take a name of our input as a first argument. It has to be the same as our schema but don't be scared, it is type safe and TypeScript will help you with that. It return all necessary properties which we want on our input. It should look like this:
+
+```tsx
+<input placeholder="Email" {...register('email')} />
+```
+
+`handleSubmit` takes a function as a first argument which we want to execute at form submission. It will pass all input values as a first argument to it.
+
+```tsx
+export default function Form() {
+  const { register, handleSubmit } = useForm<TFormSchema>({
+    resolver: zodResolver(FormSchema),
+  });
+
+  const submitForm: SubmitHandler<TFormSchema> = ({
+    email,
+    username,
+    password,
+  }) => {
+    // your form submission logic goes gere
+  };
+
+  return (
+    <form onSubmit={handleSubmit(submitForm)}>
+      <input placeholder="Email" {...register('email')} />
+      <input placeholder="Username" {...register('username')} />
+      <input placeholder="Password" type="password" {...register('password')} />
+      <button type="submit">Sign in</button>
+    </form>
+  );
+}
+```
+
+`SubmitHandler` type is from React Hook Form as well.
+
+## Errors
+
+Our form works as expected but we're not doing anything with errors. To handle it we'll use a `formState` object from `useForm` hook. It has `errors` object which contains errors for every registered input.
+
+```tsx
+const {
+  register,
+  handleSubmit,
+  formState: { errors },
+} = useForm<TFormSchema>({
+  resolver: zodResolver(FormSchema),
+});
+```
+
+Now we can check if an error occurred for specific input and display it conditionally.
+
+```tsx
+return (
+  <form onSubmit={handleSubmit(submitForm)}>
+    <input placeholder="Email" {...register('email')} />
+    {errors.email?.message && <p>{error.email.message}</p>}
+    <input placeholder="Username" {...register('username')} />
+    {errors.username?.message && <p>{error.username.message}</p>}
+    <input placeholder="Password" type="password" {...register('password')} />
+    {errors.password?.message && <p>{error.password.message}</p>}
+    <button type="submit">Sign in</button>
+  </form>
+);
+```
+
+You may also want to reset inputs values after submission. To do it just use `reset` function provided by `useForm` hook at the end of the `submitForm`.
+
+That's all! We built out first form together using React Hook Form. It provides many more things than that. For more specific use cases and more information check out docs [here](https://react-hook-form.com/docs).
+
+Out finished form look like this:
+
+```tsx
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const FormSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address' }),
+  username: z
+    .string()
+    .min(4, { message: 'Username must be 5 or more characters long' })
+    .max(16, { message: 'Username must be 16 or fewer characters long' }),
+  password: z
+    .string()
+    .min(4, { message: 'Password must be 5 or more characters long' })
+    .max(16, { message: 'Password must be 16 or fewer characters long' }),
+});
+
+type TFormSchema = z.infer<typeof FormSchema>;
+
+export default function Form() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<TFormSchema>({
+    resolver: zodResolver(FormSchema),
+  });
+
+  const submitForm: SubmitHandler<TFormSchema> = ({
+    email,
+    username,
+    password,
+  }) => {
+    // your form submission logic goes gere
+    reset();
+  };
+
+  return (
+    <form onSubmit={handleSubmit(submitForm)}>
+      <input placeholder="Email" {...register('email')} />
+      {errors.email?.message && <p>{error.email.message}</p>}
+      <input placeholder="Username" {...register('username')} />
+      {errors.username?.message && <p>{error.username.message}</p>}
+      <input placeholder="Password" type="password" {...register('password')} />
+      {errors.password?.message && <p>{error.password.message}</p>}
+      <button type="submit">Sign in</button>
+    </form>
+  );
+}
+```
+
+Thanks for reading!
