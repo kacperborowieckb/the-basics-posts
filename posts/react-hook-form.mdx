@@ -9,11 +9,11 @@ tags: ['react.js', 'forms']
 
 In this article we'll build a basic form using React Hook Form with zod validation.
 
-We will take a look at just a basics of React Hook Form. We won't focus on styling or more advanced use cases such as working with external UI libraries and using "Controller".
+We will take a look at the basics of React Hook Form. We won't focus on styling or more advanced use cases such as working with external UI libraries and using "Controller".
 
 ## Why React Hook Form?
 
-React Hook Form is an amazing lightweight tool. It allows to handle form state and validate it very easily. It is also more performant than normal controlled forms. It doesn't re-render a component on every input change like with `useState` approach. With all of that, it is very easy to understand as well and that's just a main things. For more take a closer look at [React Hook Form documentation](https://react-hook-form.com/docs).
+React Hook Form is an amazing lightweight tool. It allows to handle form state and validate it very easily. It is also more performant than normal controlled forms. It doesn't re-render a component on every input change like with `useState` approach. With all of that, it is very easy to understand. For more take a closer look at [React Hook Form documentation](https://react-hook-form.com/docs).
 
 ## Creating a schema
 
@@ -24,11 +24,11 @@ const FormSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
   username: z
     .string()
-    .min(4, { message: 'Username must be 5 or more characters long' })
+    .min(4, { message: 'Username must be 4 or more characters long' })
     .max(16, { message: 'Username must be 16 or fewer characters long' }),
   password: z
     .string()
-    .min(4, { message: 'Password must be 5 or more characters long' })
+    .min(4, { message: 'Password must be 4 or more characters long' })
     .max(16, { message: 'Password must be 16 or fewer characters long' }),
 });
 ```
@@ -194,18 +194,18 @@ export default function Form() {
     username,
     password,
   }) => {
-    // your form submission logic goes gere
+    // your form submission logic goes here
     reset();
   };
 
   return (
     <form onSubmit={handleSubmit(submitForm)}>
       <input placeholder="Email" {...register('email')} />
-      {errors.email?.message && <p>{error.email.message}</p>}
+      {errors.email?.message && <p>{errors.email.message}</p>}
       <input placeholder="Username" {...register('username')} />
-      {errors.username?.message && <p>{error.username.message}</p>}
+      {errors.username?.message && <p>{errors.username.message}</p>}
       <input placeholder="Password" type="password" {...register('password')} />
-      {errors.password?.message && <p>{error.password.message}</p>}
+      {errors.password?.message && <p>{errors.password.message}</p>}
       <button type="submit">Sign in</button>
     </form>
   );
