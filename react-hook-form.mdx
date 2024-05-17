@@ -15,6 +15,12 @@ We will take a look at the basics of React Hook Form. We won't focus on styling 
 
 React Hook Form is an amazing lightweight tool. It allows to handle form state and validate it very easily. It is also more performant than normal controlled forms. It doesn't re-render a component on every input change like with `useState` approach. With all of that, it is very easy to understand. For more take a closer look at [React Hook Form documentation](https://react-hook-form.com/docs).
 
+## Installing dependencies
+
+We need to install these three dependencies to begin.
+
+`npm i react-hook-form zod @hookform/resolvers`
+
 ## Creating a schema
 
 At first, let's declare form schema. I think it is good to start with that, because it make our work easier when creating a form.
@@ -86,6 +92,9 @@ export default function Form() {
   );
 }
 ```
+
+> [!IMPORTANT]
+> If you are using Next.js don't forget to put `"use client"` at the top of your file.
 
 ### But how to use `register` and `handleSubmit`?
 
@@ -211,5 +220,7 @@ export default function Form() {
   );
 }
 ```
+
+Don't forget to style it in a user-friendly way.
 
 Thanks for reading!
